@@ -18,25 +18,32 @@ export class PostListComponent implements OnInit, OnDestroy {
   postsPerPage = 2;
   currentPage = 1;
   pageSizeOptions = [1, 2, 5, 10];
-  private authListenerSubs : Subscription;
+  userId: string;
+  private authListenerSubs: Subscription;
   userIsAuthenticated = false;
 
-  constructor(private postService: PostService, private authService: AuthService) {}
+  constructor(
+    private postService: PostService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.isLoading = true;
     this.postService.getPosts(this.postsPerPage, this.currentPage);
+    this.userId = this.authService.getUserId();
     this.postSub = this.postService
       .getPostUpdateListener()
-      .subscribe((postData: {posts: Post[], postCount: number}) => {
+      .subscribe((postData: { posts: Post[]; postCount: number }) => {
         this.isLoading = false;
         this.posts = postData.posts;
         this.totalPosts = postData.postCount;
       });
-      this.userIsAuthenticated = this.authService.getIsAuth();
-    this.authListenerSubs = this.authService.getAuthStatusListener().subscribe(
-      isAuthenticated => {
+    this.userIsAuthenticated = this.authService.getIsAuth();
+    this.authListenerSubs = this.authService
+      .getAuthStatusListener()
+      .subscribe((isAuthenticated) => {
         this.userIsAuthenticated = isAuthenticated;
+        this.userId = this.authService.getUserId();
       });
   }
 
@@ -48,10 +55,13 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   onDelete(postId: string) {
-    if (this.posts.length === 1 && (this.totalPosts - (this.postsPerPage * this.currentPage)) < this.totalPosts){
+    if (
+      this.posts.length === 1 &&
+      this.totalPosts - this.postsPerPage * this.currentPage < this.totalPosts
+    ) {
       this.currentPage -= 1;
     }
-    this.isLoading  =true;
+    this.isLoading = true;
     this.postService.deletePost(postId).subscribe(() => {
       this.postService.getPosts(this.postsPerPage, this.currentPage);
     });
