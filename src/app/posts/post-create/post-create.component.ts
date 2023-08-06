@@ -1,11 +1,17 @@
-import { Component, OnInit, EventEmitter, Output, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  EventEmitter,
+  Output,
+  OnDestroy,
+} from '@angular/core';
 import { FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
 import { PostService } from '../service/post.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Post } from '../post.model';
 import { mimeType } from './mime-type.validator';
 import { Subscription } from 'rxjs';
-import { AuthService } from 'src/app/auth/auth-service.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-post-create',
@@ -30,11 +36,11 @@ export class PostCreateComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.authStatusSub = this.authService.getAuthStatusListener().subscribe(
-      authStatus => {
+    this.authStatusSub = this.authService
+      .getAuthStatusListener()
+      .subscribe((authStatus) => {
         this.isLoading = false;
-      }
-    );
+      });
     this.form = new FormGroup({
       title: new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)],
@@ -59,12 +65,12 @@ export class PostCreateComponent implements OnInit, OnDestroy {
             title: postData.title,
             content: postData.content,
             imagePath: postData.imagePath,
-            creator: postData.creator
+            creator: postData.creator,
           };
           this.form.setValue({
             title: this.post.title,
             content: this.post.content,
-            image: this.post.imagePath
+            image: this.post.imagePath,
           });
         });
       } else {
